@@ -1,38 +1,63 @@
 /*jshint esversion: 6 */
-tick (0);
-
-// document.querySelector(".start").addEventListener("click", () => {
-let evs =
-  [ [ 1000, tick, 1]
-  , [ 2000, tick, 2]
-  , [ 3000, tick, 3]
-  , [ 4000, tick, 4]
+let ticks = 0;
+function ticker()
+{
+    ticks += 1;
+    setTimeout(
+      () => {
+          tick(ticks);
+          ticker();
+      },
+      1000
+    );
+}
+let sounds =
+  [ [ 1000, cue, 1]
+  , [ 2000, cue, 1]
+  , [ 3000, cue, 1]
+  , [ 4000, cue, 1]
+  , [ 5000, cue, 1]
+  , [ 6000, cue, 1]
+  , [ 7000, cue, 1]
   ];
+
+let celes = new Howl({
+    src: ['https://raw.githubusercontent.com/yumecs/audiomap/master/voices/celes.mp3']
+});
+
+let dot = new Howl({
+    src: ['https://raw.githubusercontent.com/yumecs/audiomap/master/voices/dot.mp3']
+});
+
+let start = 0;
+
+const voices = [celes, dot];
 
 function runEvents(events)
 {
   const [ head, ...tail ] = events;
   if (head !== undefined) {
-    const [ timeout, action, number ] = head;
+    let [ timeout, action, number ] = head;
+    let temp = timeout;
+    timeout = timeout - start;
+    start = temp;
     setTimeout(
-      () => { tick(number); runEvents(tail); },
+      () => {
+          action(voices, number);
+          runEvents(tail);
+      },
       timeout
     );
   }
 }
 
-runEvents(evs);
+runEvents(sounds);
+ticker();
 
 function tick (n) {
     document.querySelector("#timer").textContent = n;
 }
 
-function cue (map, n) {
-
+function cue (ls, n) {
+    voices[n].play();
 }
-
-var vestiges = new Howl({
-  src: ['https://raw.githubusercontent.com/yumecs/dream/master/music/vestiges_final_final_final.mp3']
-});
-
-vestiges.play();
